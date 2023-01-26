@@ -25,6 +25,7 @@ const options = [
     },
 ]
 function viewDepartments () {
+    console.log("testing")
     db.query("select * from department", (err, rows)=> {
         console.table(rows);
         showOptions()
@@ -60,21 +61,44 @@ function addRole () {
     inquirer.prompt({
         type: "input",
         message: "What is the name of the role?",
-        name: "roleName",
+        name: "roleTitle",
+    },
+    {
+        type:"list",
+        message: "What is the role's salary?",
+        name: "roleSalary",
+        choices: [10, 5, 2, 1]
+    },
+    {
+        type:"list",
+        message: "What department does this role belong to?",
+        name: "roleDepartment",
+        choices: ["Sales", "Marketing", "Good ol Fun"]
     }). then ((answers) => {
-        db.query ("INSERT INTO role(name)values(?)", [answers.roleName], (err, rows) => {
-            console.table(rows);
-            showOptions()
-        })
+        db.query ("INSERT INTO role(title, salary, department_id)values(?)", [answers.roleTitle, answers.RoleSalary, answers.roleDepartment], (err, rows) => {
+            console.table(rows);})
+        showOptions()
     }) 
 }
 function addEmployee () {
     inquirer.prompt({
         type: "input",
-        message: "What is the name of the new employee?",
-        name: "employeeName",
-    }). then ((answers) => {
-        db.query ("INSERT INTO employee(name)values(?)", [answers.employeeName], (err, rows) => {
+        message: "What is the first name of the new employee?",
+        name: "employeeFirstName",
+    }, 
+    {
+        type: "input",
+        message: "What is the employee's last name?",
+        name: "employeeLastName",
+    }, 
+    {
+        type: "list",
+        message: "What is the employee's role?",
+        name: "employeeRole",
+        choices: ["Manager", "Supervisor","Jerk","Peon"],
+    },
+    ). then ((answers) => {
+        db.query ("INSERT INTO employee(first_name, last_name, role_id)values(?)", [answers.employeeFirstName, answers.employeeLastName, answers.employeeRole], (err, rows) => {
             console.table(rows);
             showOptions()
         })
@@ -99,19 +123,20 @@ function updateEmployee () {
 
 function showOptions() {
     inquirer.prompt(options).then((answers => {
-    if (options.action === "View all departments") {
-        viewDepartments();
-    } else if (options.action === "View all roles") {
+    if (answers.action === "View all departments") { //tried changing options.actions to answers
+        viewDepartments()
+        console.log("Yippee");
+    } else if (answers.action === "View all roles") {
         viewRole();
-    } else if (options.action === "View all employees") {
+    } else if (answers.action === "View all employees") {
         viewEmployee();
-    } else if (options.action === "Add a department") {
+    } else if (answers.action === "Add a department") {
        addDepartment();
-    } else if (options.action === "Add a role") {
+    } else if (answers.action === "Add a role") {
         addRole();
-    } else if (options.action === "Add an employee") {
+    } else if (answers.action === "Add an employee") {
         addEmployee();
-    } else if (options.action === "Update an employee role") {
+    } else if (answers.action === "Update an employee role") {
         updateEmployee();
     }
 }))}
