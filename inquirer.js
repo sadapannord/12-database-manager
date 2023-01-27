@@ -58,7 +58,7 @@ function addDepartment () {
     }) 
 }
 function addRole () {
-    inquirer.prompt({
+    inquirer.prompt([{
         type: "input",
         message: "What is the name of the role?",
         name: "roleTitle",
@@ -74,14 +74,15 @@ function addRole () {
         message: "What department does this role belong to?",
         name: "roleDepartment",
         choices: ["Sales", "Marketing", "Good ol Fun"]
-    }). then ((answers) => {
-        db.query ("INSERT INTO role(title, salary, department_id)values(?)", [answers.roleTitle, answers.RoleSalary, answers.roleDepartment], (err, rows) => {
+    }]). then ((answers) => {
+        console.log(answers.roleTitle, answers.roleSalary, answers.roleDepartment)
+        db.query ("INSERT INTO role(answers)values(?)", [answers.roleTitle, answers.roleSalary, answers.roleDepartment], (err, rows) => {
             console.table(rows);})
         showOptions()
     }) 
 }
 function addEmployee () {
-    inquirer.prompt({
+    inquirer.prompt([{
         type: "input",
         message: "What is the first name of the new employee?",
         name: "employeeFirstName",
@@ -96,7 +97,7 @@ function addEmployee () {
         message: "What is the employee's role?",
         name: "employeeRole",
         choices: ["Manager", "Supervisor","Jerk","Peon"],
-    },
+    },]
     ). then ((answers) => {
         db.query ("INSERT INTO employee(first_name, last_name, role_id)values(?)", [answers.employeeFirstName, answers.employeeLastName, answers.employeeRole], (err, rows) => {
             console.table(rows);
