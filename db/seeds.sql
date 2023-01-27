@@ -21,4 +21,6 @@ VALUES ("Manager", 10, 1),
 
 
 INSERT INTO employee (first_name, last_name, role_id, manager_id)
-VALUES ("sada", "pannord", 1, 2)
+VALUES ("sada", "hello", 1, 2),
+        ("dan", "best", 2, 2),
+        ("josi", "name", 1, 3)

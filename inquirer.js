@@ -58,6 +58,15 @@ function addDepartment() {
     })
 }
 function addRole() {
+    const seeDepartments = [];
+    db.promise().query("SELECT * FROM department").then(([queryDepartments]) => {
+        queryDepartments.map(({name }) => (seeDepartments.push({ name: name,}))
+        )
+    })
+
+    // console.log(queryDepartments, seeDepartments);
+
+
     inquirer.prompt([{
         type: "input",
         message: "What is the name of the role?",
@@ -73,16 +82,19 @@ function addRole() {
         type: "list",
         message: "What department does this role belong to?",
         name: "roleDepartment",
-        choices: ["Sales", "Marketing", "Good ol Fun"]
+        choices: seeDepartments
     }]).then((answers) => {
         console.log(answers.roleTitle, answers.roleSalary, answers.roleDepartment)
-        db.query("INSERT INTO role set ?", {title:answers.roleTitle, salary: answers.roleSalary, department_id:1}, (err, rows) => {
+        db.query("INSERT INTO role set ?", { title: answers.roleTitle, salary: answers.roleSalary, department_id: 1 }, (err, rows) => {
             console.table(rows);
         })
         showOptions()
     })
 }
 function addEmployee() {
+    const role = []
+    db.promise().query("SELECT * FROM role").then(([data]) => { 
+        data.map(({title}) => (role.push({value: title} ))) })
     inquirer.prompt([{
         type: "input",
         message: "What is the first name of the new employee?",
@@ -97,16 +109,19 @@ function addEmployee() {
         type: "list",
         message: "What is the employee's role?",
         name: "employeeRole",
-        choices: ["Manager", "Supervisor", "Jerk", "Peon"],
+        choices: role,
     },]
     ).then((answers) => {
-        db.query("INSERT INTO employee(first_name, last_name, role_id)values(?)", [answers.employeeFirstName, answers.employeeLastName, answers.employeeRole], (err, rows) => {
+        db.query("INSERT INTO employee set ?", { first_name: answers.employeeFirstName, last_name: answers.employeeLastName, role_id: answers.employeeRole }, (err, rows) => {
             console.table(rows);
             showOptions()
         })
     })
 }
 function updateEmployee() {
+    const newRole = []
+    db.promise().query("SELECT * FROM role").then(([data]) => { 
+        data.map(({title}) => (role.push({value: title} ))) })
     inquirer.prompt([{
         type: "input",
         message: "What is the employee's id?",
@@ -116,10 +131,10 @@ function updateEmployee() {
         type: "list",
         message: "What is the employee's new role?",
         name: "employeeRole",
-        choices: ["Manager", "Supervisor", "Jerk", "Peon"]
+        choices: newRole,
 
     }]).then((answers) => {
-        db.query("UPDATE employee SET role_id = ? WHERE id = ?", [answers.employeeRole], (err, rows) => {
+        db.query("UPDATE employee SET role_id = ? WHERE id = ?", {id:employeeID, role_id:employeeRole}, (err, rows) => {
             console.table(rows);
             showOptions()
         })
