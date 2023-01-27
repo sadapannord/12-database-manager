@@ -25,7 +25,6 @@ const options = [
     },
 ]
 function viewDepartments() {
-    console.log("testing")
     db.query("select * from department", (err, rows) => {
         console.table(rows);
         showOptions()
@@ -63,10 +62,6 @@ function addRole() {
         queryDepartments.map(({name }) => (seeDepartments.push({ name: name,}))
         )
     })
-
-    // console.log(queryDepartments, seeDepartments);
-
-
     inquirer.prompt([{
         type: "input",
         message: "What is the name of the role?",
@@ -94,7 +89,7 @@ function addRole() {
 function addEmployee() {
     const role = []
     db.promise().query("SELECT * FROM role").then(([data]) => { 
-        data.map(({title}) => (role.push({value: title} ))) })
+        data.map(({id, title, department_id}) => (role.push({id:id, value: title, department:department_id} ))) })
     inquirer.prompt([{
         type: "input",
         message: "What is the first name of the new employee?",
@@ -107,11 +102,11 @@ function addEmployee() {
     },
     {
         type: "list",
-        message: "What is the employee's role?",
+        message: "What is their manager's ID?",
         name: "employeeRole",
         choices: role,
-    },]
-    ).then((answers) => {
+    }]).then((answers) => {
+        console.log(answers.employeeFirstName, answers.employeeLastName, answers.employeeRole)
         db.query("INSERT INTO employee set ?", { first_name: answers.employeeFirstName, last_name: answers.employeeLastName, role_id: answers.employeeRole }, (err, rows) => {
             console.table(rows);
             showOptions()
@@ -122,11 +117,11 @@ function updateEmployee() {
     const newRole = []
     db.promise().query("SELECT * FROM role").then(([data]) => { 
         data.map(({title}) => (role.push({value: title} ))) })
-    inquirer.prompt([{
-        type: "input",
-        message: "What is the employee's id?",
-        name: "employeeID",
-    },
+        inquirer.prompt([{
+            type: "input",
+            message: "What is the employee's id?",
+            name: "employeeID",
+        },
     {
         type: "list",
         message: "What is the employee's new role?",
@@ -134,7 +129,7 @@ function updateEmployee() {
         choices: newRole,
 
     }]).then((answers) => {
-        db.query("UPDATE employee SET role_id = ? WHERE id = ?", {id:employeeID, role_id:employeeRole}, (err, rows) => {
+        db.query("UPDATE employee SET role_id = ? WHERE id = ?", {id:answers.employeeID, role_id:answers.employeeRole}, (err, rows) => {
             console.table(rows);
             showOptions()
         })
@@ -145,9 +140,8 @@ function updateEmployee() {
 
 function showOptions() {
     inquirer.prompt(options).then((answers => {
-        if (answers.action === "View all departments") { //tried changing options.actions to answers
+        if (answers.action === "View all departments") { 
             viewDepartments()
-            console.log("Yippee");
         } else if (answers.action === "View all roles") {
             viewRole();
         } else if (answers.action === "View all employees") {
