@@ -59,7 +59,7 @@ function addDepartment() {
 function addRole() {
     const seeDepartments = [];
     db.promise().query("SELECT * FROM department").then(([queryDepartments]) => {
-        queryDepartments.map(({name }) => (seeDepartments.push({ name: name,}))
+        queryDepartments.map(({ name }) => (seeDepartments.push({ name: name, }))
         )
     })
     inquirer.prompt([{
@@ -88,40 +88,56 @@ function addRole() {
 }
 function addEmployee() {
     const role = []
-    db.promise().query("SELECT * FROM role").then(([data]) => { 
-        data.map(({id, title, department_id}) => (role.push({id:id, value: title, department:department_id} ))) })
-    inquirer.prompt([{
-        type: "input",
-        message: "What is the first name of the new employee?",
-        name: "employeeFirstName",
-    },
-    {
-        type: "input",
-        message: "What is the employee's last name?",
-        name: "employeeLastName",
-    },
-    {
-        type: "list",
-        message: "What is their manager's ID?",
-        name: "employeeRole",
-        choices: role,
-    }]).then((answers) => {
-        console.log(answers.employeeFirstName, answers.employeeLastName, answers.employeeRole)
-        db.query("INSERT INTO employee set ?", { first_name: answers.employeeFirstName, last_name: answers.employeeLastName, role_id: answers.employeeRole }, (err, rows) => {
-            console.table(rows);
-            showOptions()
+    db.promise().query("SELECT * FROM role").then(([data]) => {
+        data.map(({ id, title, department_id }) => (role.push({ name: title, value: id })))
+    })
+    const employees = []
+    db.promise().query("SELECT * FROM employee").then(([data]) => {
+        data.map(({ first_name, last_name, id }) => (employees.push({ name: first_name + " " + last_name, value: id })))
+        console.log(employees)
+        inquirer.prompt([{
+            type: "input",
+            message: "What is the first name of the new employee?",
+            name: "employeeFirstName",
+        },
+        {
+            type: "input",
+            message: "What is the employee's last name?",
+            name: "employeeLastName",
+        },
+
+        {
+            type: "list",
+            message: "What is the employee's role?",
+            name: "employeeRole",
+            choices: role,
+        },
+
+        {
+            type: "list",
+            message: "What is the employee's manager?",
+            name: "employeeManager",
+            choices: employees,
+        },
+        ]).then((answers) => {
+            console.log(answers)
+            db.query("INSERT INTO employee set ?", { first_name: answers.employeeFirstName, last_name: answers.employeeLastName, role_id: answers.employeeRole, manager_id: answers.employeeManager }, (err, rows) => {
+                console.table(rows);
+                showOptions()
+            })
         })
     })
 }
 function updateEmployee() {
     const newRole = []
-    db.promise().query("SELECT * FROM role").then(([data]) => { 
-        data.map(({title}) => (role.push({value: title} ))) })
-        inquirer.prompt([{
-            type: "input",
-            message: "What is the employee's id?",
-            name: "employeeID",
-        },
+    db.promise().query("SELECT * FROM role").then(([data]) => {
+        data.map(({ title, id }) => (newRole.push({ name:title, value: id})))//name is what they see value is what its value actually is
+   
+    inquirer.prompt([{
+        type: "input",
+        message: "What is the employee's id?",
+        name: "employeeID",
+    },
     {
         type: "list",
         message: "What is the employee's new role?",
@@ -129,18 +145,18 @@ function updateEmployee() {
         choices: newRole,
 
     }]).then((answers) => {
-        db.query("UPDATE employee SET role_id = ? WHERE id = ?", {id:answers.employeeID, role_id:answers.employeeRole}, (err, rows) => {
+        db.query("UPDATE employee SET role_id = ? WHERE id = ?", { id: answers.employeeID, role_id: answers.employeeRole }, (err, rows) => {
             console.table(rows);
             showOptions()
         })
-    })
+    }) })
 }
 
 
 
 function showOptions() {
     inquirer.prompt(options).then((answers => {
-        if (answers.action === "View all departments") { 
+        if (answers.action === "View all departments") {
             viewDepartments()
         } else if (answers.action === "View all roles") {
             viewRole();
